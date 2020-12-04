@@ -31,8 +31,7 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                              width = "70px", step = 10),
                                 tags$span("pixels"),
                        ),
-              ),
-              tabPanel("Statistics",
+
                        fluidRow(
                          withTags(
                            table(
@@ -62,7 +61,7 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                              ),
                              tr(
                                td('Simpson index: '),
-                               textOutput('shannon', td)
+                               textOutput('simpson', td)
                              ),
                              tr(
                                td('Shannon entropy: '),
@@ -87,7 +86,6 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
 server <- function(input, output, session) {
 
   r <- reactiveValues()
-  displaySetting <- function(id) id %in% input$display
 
   filePath <- reactive({
     fileInput <- input$datafile
@@ -165,19 +163,7 @@ server <- function(input, output, session) {
                            '.txt' = 'read.table',
                            '.xls' = 'readxl::read_excel',
                            'xlsx' = 'readxl::read_excel', 'read.csv'),
-      '("', r$fileName, '")\n',
-
-      '\n# Plot the histogram\n',
-      'myHist <- hist(myData, main = "",\n',
-      '               breaks = ',
-      if(input$breaks == 0) '"Sturges"' else input$breaks, ',\n',
-      '               xlab = "', xlab(), '")\n\n',
-      if (input$norm) {
-        paste0('# Overlay the best-fitting normal curve\n',
-               'x <- seq(min(myData), max(myData), length.out = 128)\n',
-               'multiplier <- myHist$counts[1] / myHist$density[1]\n',
-               'curve(dnorm(x, mean(myData), sd(myData)) * multiplier, add = TRUE)\n\n')
-      }
+      '("', r$fileName, '")\n'
     )
   }
 
@@ -187,7 +173,9 @@ server <- function(input, output, session) {
   S <- reactive(sum(assemblage() > 0))
   n <- reactive(sum(assemblage()))
   pi <- reactive(assemblage() / n())
-  shannon <- reactive(-sum(pi() * log(pi())))
+  log0 <- function (x) ifelse(x == 0, 0, log(x))
+  Entropy <- function (p) -sum(p * log0(p))
+  shannon <- reactive(Entropy(pi()))
 
   output$n <- renderText(n())
   output$nMax <- renderText(max(assemblage()))
@@ -197,7 +185,12 @@ server <- function(input, output, session) {
   output$bpi <- renderText(signif(max(assemblage()) / n(), 4))
   output$simpson <- renderText(signif(sum(pi() ^ 2), 4))
   output$shannon <- renderText(signif(shannon(), 4))
-  output$equit <- renderText(signif(shannon(), 4))
+  output$equit <- renderText({
+    mx <- Entropy(rep(1 / S(), S()))
+    mn <- Entropy(c(rep(1, S() - 1), n() - S() + 1) / n())
+    eq <- (shannon() - mn) / (mx - mn)
+    signif(eq, 4)
+    })
 
   output$savePng <- downloadHandler(
     filename = 'Histogram.png',

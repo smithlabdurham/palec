@@ -10,9 +10,13 @@ License: GPL3
 Depends:
   R (>= 3.4.0)
 Imports:
+  moments,
+  shiny,
+  shinyjs,
   Ternary
 Suggests:
   covr,
   testthat
-RoxygenNote: 6.0.0
+Encoding: UTF-8
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)

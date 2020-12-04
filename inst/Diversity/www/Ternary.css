@@ -63,3 +63,12 @@ div#saveButtons {
   width: 80px;
   text-align: right;
 }
+
+td:first-child {
+  text-align: right;
+}
+
+td:nth-child(2) {
+  text-align: center;
+  width: 6em;
+}

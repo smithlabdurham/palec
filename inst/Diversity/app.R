@@ -1,7 +1,9 @@
 library("shiny")
+library("shinyjs", exclude = 'runExample', warn.conflicts = FALSE)
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
+        useShinyjs(),
         sidebarLayout(
           sidebarPanel(
             tags$div("Upload a csv or spreadsheet in which each column ",
@@ -12,6 +14,10 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
             textOutput(outputId = "dataStatus"),
             radioButtons('col', 'Assemblage',
                         setNames(as.list(1:10), paste0('CD', 1:10))),
+            checkboxInput('rank', 'Order by rank abundance', FALSE),
+            checkboxInput('log', 'Log transform abundance', FALSE),
+            radioButtons('scatter', 'Plot type',
+                         list('Bar plot' = FALSE, 'Scatter plot' = TRUE)),
             sliderInput('xlim', 'Axis size (0 = auto)', 0, 420, 0, step = 1),
           ),
 
@@ -31,46 +37,62 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                              width = "70px", step = 10),
                                 tags$span("pixels"),
                        ),
-
+                       inlineCSS(setNames(as.list(paste0('border-right: ',
+                                                         viridis::inferno(129),
+                                                         ' solid ',
+                                                         signif(0:128 / 14, 3), 'em;')),
+                                          paste0('.scale', 0:128))),
                        fluidRow(
                          withTags(
                            table(
                              tr(
                                td('Total count (n): '),
-                               textOutput('n', container = td)
+                               textOutput('n', container = td),
+                               td(id = 'nSwatch', class = 'swatch')
                              ),
                              tr(
                                td('Count of most abundant (n_t_): '),
-                               textOutput('nMax', td)
+                               textOutput('nMax', td),
+                               td(id = 'nMaxSwatch', class = 'swatch')
                              ),
                              tr(
                                td('Species richness (S): '),
-                               textOutput('richness', td)
+                               textOutput('richness', td),
+                               td(id = 'richnessSwatch', class = 'swatch')
                              ),
                              tr(
                                td("Menhinick's richness: "),
-                               textOutput('menhinick', td)
+                               textOutput('menhinick', td),
+                               td(id = 'menhinickSwatch', class = 'swatch')
                              ),
                              tr(
                                td("Margalef's richness: "),
-                               textOutput('margalef', td)
+                               textOutput('margalef', td),
+                               td(id = 'margalefSwatch', class = 'swatch')
                              ),
                              tr(
                                td('Berger–Parker index: '),
-                               textOutput('bpi', td)
+                               textOutput('bpi', td),
+                               td(id = 'bpiSwatch', class = 'swatch')
                              ),
                              tr(
                                td('Simpson index: '),
-                               textOutput('simpson', td)
+                               textOutput('simpson', td),
+                               td(id = 'simpsonSwatch', class = 'swatch')
                              ),
                              tr(
                                td('Shannon entropy: '),
-                               textOutput('shannon', td)
+                               textOutput('shannon', td),
+                               td(id = 'shannonSwatch', class = 'swatch')
                              ),
                              tr(
                                td('Equitibility (J): '),
-                               textOutput('equit', td)
+                               textOutput('equit', td),
+                               td(id = 'equitSwatch', class = 'swatch')
                              ),
+                             tr(td(), td(),
+                                td(class = 'swatch',
+                                   style = 'border-right: solid #ffff 9.14em'))
                            )
                          ),
                        ),
@@ -84,7 +106,6 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
 )
 
 server <- function(input, output, session) {
-
   r <- reactiveValues()
 
   filePath <- reactive({
@@ -140,19 +161,54 @@ server <- function(input, output, session) {
 
   assemblage <- reactive(myData()[, as.integer(input$col)])
 
+  Swatch <- function (id, val, mx = 1) {
+    scalePoint <- as.integer(128 * val / mx)
+    addCssClass(paste0(id, 'Swatch'),
+                paste0('scale', scalePoint),
+                asis = TRUE)
+  }
+
   makePlot <- function () {
-    dat <- myData()
-    lab <- rownames(dat)
+    dat <- assemblage()
+    dat[dat == 0] <- NA
 
-    par(las = 1, cex = 0.8, mar = c(3, max(nchar(lab)) * 0.6, 0, 1))
-    barplot(assemblage(),
-            main = "",
-            horiz = TRUE,
-            names.arg = rownames(dat),
-            xlab = "Count",
-            xlim = if (input$xlim > 0) c(0, input$xlim) else NULL
-    )
+    order <- if (input$rank) order(assemblage()) else seq_along(assemblage())
+    lab <- rownames(myData())[order]
 
+    if (input$scatter) {
+      par(las = 1, cex = 0.8, mar = c(4, 4, 0, 1))
+      plot(dat[order] ~ rev(seq_along(dat)),
+           main = "",
+           log = if(input$log) 'y' else '',
+           xlab = "Rank order",
+           ylab = "Count",
+           ylim = if (input$xlim > 0) c(0, input$xlim) else NULL,
+           frame = FALSE,
+           pch = 3
+      )
+    } else {
+      par(las = 1, cex = 0.8, mar = c(3, max(nchar(lab)) * 0.6, 0, 1))
+      barplot(dat[order],
+              main = "",
+              log = if(input$log) 'x' else '',
+              horiz = TRUE,
+              names.arg = lab,
+              xlab = "Count",
+              xlim = if (input$xlim > 0) c(0, input$xlim) else NULL
+      )
+    }
+    for (class in paste0('scale', 0:128)) {
+      removeCssClass(class = class, selector = 'td.swatch')
+    }
+    Swatch('n', n(), max(colSums(myData())))
+    Swatch('nMax', nMax() - evens(), n() - S() - evens())
+    Swatch('richness', S(), nrow(myData()))
+    Swatch('menhinick', menh(), sqrt(n()))
+    Swatch('margalef', marg(), (n() - 1) / log(n()))
+    Swatch('bpi', bpi())
+    Swatch('simpson', simpson())
+    Swatch('shannon', equit())
+    Swatch('equit', equit())
   }
 
   rScript <- function() {
@@ -163,7 +219,7 @@ server <- function(input, output, session) {
                            '.txt' = 'read.table',
                            '.xls' = 'readxl::read_excel',
                            'xlsx' = 'readxl::read_excel', 'read.csv'),
-      '("', r$fileName, '")\n'
+      '("', r$fileName, '")\n\n# Code not available. Check the source code...'
     )
   }
 
@@ -172,25 +228,31 @@ server <- function(input, output, session) {
 
   S <- reactive(sum(assemblage() > 0))
   n <- reactive(sum(assemblage()))
+  evens <- reactive(n() / S())
+  nMax <- reactive(max(assemblage()))
+  menh <- reactive(S() / sqrt(n()))
+  marg <- reactive((S() - 1) / log(n()))
+  bpi <- reactive(nMax() / n())
   pi <- reactive(assemblage() / n())
+  simpson <- reactive(sum(pi() ^ 2))
   log0 <- function (x) ifelse(x == 0, 0, log(x))
   Entropy <- function (p) -sum(p * log0(p))
   shannon <- reactive(Entropy(pi()))
-
-  output$n <- renderText(n())
-  output$nMax <- renderText(max(assemblage()))
-  output$richness <- renderText(S())
-  output$menhinick <- renderText(signif(S() / sqrt(n()), 4))
-  output$margalef <- renderText(signif((S() - 1) / log(n()), 4))
-  output$bpi <- renderText(signif(max(assemblage()) / n(), 4))
-  output$simpson <- renderText(signif(sum(pi() ^ 2), 4))
-  output$shannon <- renderText(signif(shannon(), 4))
-  output$equit <- renderText({
+  equit <- reactive({
     mx <- Entropy(rep(1 / S(), S()))
     mn <- Entropy(c(rep(1, S() - 1), n() - S() + 1) / n())
-    eq <- (shannon() - mn) / (mx - mn)
-    signif(eq, 4)
-    })
+    (shannon() - mn) / (mx - mn)
+  })
+
+  output$n <- renderText(n())
+  output$nMax <- renderText(nMax())
+  output$richness <- renderText(S())
+  output$menhinick <- renderText(signif(menh(), 4))
+  output$margalef <- renderText(signif(marg(), 4))
+  output$bpi <- renderText(signif(bpi(), 4))
+  output$simpson <- renderText(signif(simpson(), 4))
+  output$shannon <- renderText(signif(shannon(), 4))
+  output$equit <- renderText(signif(equit(), 4))
 
   output$savePng <- downloadHandler(
     filename = 'Histogram.png',

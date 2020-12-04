@@ -45,16 +45,14 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                        fluidRow(
                          withTags(
                            table(
+                             tr(th('Sample size')),
                              tr(
                                td('Total count (n): '),
                                textOutput('n', container = td),
                                td(id = 'nSwatch', class = 'swatch')
                              ),
-                             tr(
-                               td('Count of most abundant (n_t_): '),
-                               textOutput('nMax', td),
-                               td(id = 'nMaxSwatch', class = 'swatch')
-                             ),
+
+                             tr(th('Diversity')),
                              tr(
                                td('Species richness (S): '),
                                textOutput('richness', td),
@@ -71,16 +69,6 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                td(id = 'margalefSwatch', class = 'swatch')
                              ),
                              tr(
-                               td('Berger–Parker index: '),
-                               textOutput('bpi', td),
-                               td(id = 'bpiSwatch', class = 'swatch')
-                             ),
-                             tr(
-                               td('Simpson index: '),
-                               textOutput('simpson', td),
-                               td(id = 'simpsonSwatch', class = 'swatch')
-                             ),
-                             tr(
                                td('Shannon entropy: '),
                                textOutput('shannon', td),
                                td(id = 'shannonSwatch', class = 'swatch')
@@ -90,12 +78,33 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                textOutput('equit', td),
                                td(id = 'equitSwatch', class = 'swatch')
                              ),
+
+                             tr(th('Dominance')),
+                             tr(
+                               td('Count of most abundant (n_t_): '),
+                               textOutput('nMax', td),
+                               td(id = 'nMaxSwatch', class = 'swatch')
+                             ),
+                             tr(
+                               td('Berger–Parker index: '),
+                               textOutput('bpi', td),
+                               td(id = 'bpiSwatch', class = 'swatch')
+                             ),
+                             tr(
+                               td('Simpson index: '),
+                               textOutput('simpson', td),
+                               td(id = 'simpsonSwatch', class = 'swatch')
+                             ),
+
                              tr(td(), td(),
                                 td(class = 'swatch',
-                                   style = 'border-right: solid #ffff 9.14em'))
+                                   style = 'border-right: solid #000A 9.14em; height: 1px')
+                              )
                            )
                          ),
+                         checkboxInput('correct', 'Correct range for sample size', FALSE),
                        ),
+
               ),
               tabPanel("R code",
                        fluidRow(verbatimTextOutput('code')),
@@ -161,8 +170,8 @@ server <- function(input, output, session) {
 
   assemblage <- reactive(myData()[, as.integer(input$col)])
 
-  Swatch <- function (id, val, mx = 1) {
-    scalePoint <- as.integer(128 * val / mx)
+  Swatch <- function (id, val, mx = 1, mn = 0) {
+    scalePoint <- as.integer(128 * (val - mn) / (mx - mn))
     addCssClass(paste0(id, 'Swatch'),
                 paste0('scale', scalePoint),
                 asis = TRUE)
@@ -200,15 +209,22 @@ server <- function(input, output, session) {
     for (class in paste0('scale', 0:128)) {
       removeCssClass(class = class, selector = 'td.swatch')
     }
-    Swatch('n', n(), max(colSums(myData())))
-    Swatch('nMax', nMax() - evens(), n() - S() - evens())
-    Swatch('richness', S(), nrow(myData()))
-    Swatch('menhinick', menh(), sqrt(n()))
+    Swatch('n', n(), max(colSums(myData())), 1)
+    Swatch('richness', S(), nrow(myData()), 1)
+    Swatch('menhinick', menh(), sqrt(n()), 1 / sqrt(n()))
     Swatch('margalef', marg(), (n() - 1) / log(n()))
-    Swatch('bpi', bpi())
-    Swatch('simpson', simpson())
     Swatch('shannon', equit())
     Swatch('equit', equit())
+    Swatch('nMax', nMax() - evens(), n() - S() - evens())
+    if (input$correct) {
+      Swatch('bpi', bpi(), (n() + 1 - S()) / n(), 1 / S())
+      Swatch('simpson', simpson(),
+             mx = sum((c(rep(1, S() - 1), n() + 1 - S()) / n()) ^ 2),
+             mn = sum(rep(1 / S(), S()) ^ 2))
+    } else {
+      Swatch('bpi', bpi())
+      Swatch('simpson', simpson())
+    }
   }
 
   rScript <- function() {

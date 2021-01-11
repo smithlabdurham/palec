@@ -1,5 +1,6 @@
 library("shiny")
-library("shinyjs", exclude = 'runExample', warn.conflicts = FALSE)
+library("shinyjs", exclude = 'runExample', warn.conflicts = FALSE,
+        quietly = TRUE)
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
@@ -119,7 +120,7 @@ server <- function(input, output, session) {
 
   filePath <- reactive({
     fileInput <- input$datafile
-    exampleFile <- system.file('Llanvirn.txt', package = 'palec')
+    exampleFile <- system.file('diversity.txt', package = 'palec')
     if (is.null(fileInput)) {
       output$dataStatus <- renderText(paste(
         "Data file not found; using example from", exampleFile))

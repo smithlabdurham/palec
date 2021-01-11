@@ -1,0 +1,5 @@
+ One Two Three Four
+Species_four 00 01 01 02
+Species_three 00 10 10 00
+Species_two 40 30 00 10
+Species_one 10 20 30 40

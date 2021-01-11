@@ -9,7 +9,8 @@ ui <- fluidPage(title = 'Survivorship curves', theme = "Ternary.css",
      fileInput("datafile", "Data", placeholder = "No data file selected",
                accept = c('.csv', '.txt', '.xls', '.xlsx')),
      textOutput(outputId = "dataStatus"),
-     checkboxInput('log', 'Log transform', FALSE),
+     checkboxInput('logX', 'Log transform X', FALSE),
+     checkboxInput('logY', 'Log transform Y', TRUE),
      textInput("xlab", "X Label", "Value / unit"),
     ),
 
@@ -99,7 +100,7 @@ server <- function(input, output, session) {
     y <- vapply(x, function (x) sum(dat >= x), 0L) * 100 / length(dat)
 
     plot(y ~ x,
-         log = if(input$log) 'xy' else 'y',
+         log = paste0(if(input$logX) 'x' else '', if(input$logY) 'y'),
          xlab = xlab(), ylab = "Percentage of individuals surviving",
          pch = 3, frame = FALSE)
 
@@ -117,7 +118,7 @@ server <- function(input, output, session) {
       'x <- c(0, unique(myData))\n',
       'y <- vapply(x, function (x) sum(myData >= x), 0L) * 100 / length(myData)\n',
       'plot(y ~ x,\n',
-      '     log = "', if(input$log) 'xy' else 'y', '",\n',
+      '     log = "', if(input$logX) 'x', if(input$logY) 'y' else '', '",\n',
       '     xlab = "', xlab(), '",\n',
       '     ylab = "Percentage of individuals surviving",\n',
       '     pch = 3, frame = FALSE)\n\n'

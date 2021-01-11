@@ -1,50 +1,44 @@
 library("shiny")
 
 # Define UI for app that draws a histogram ----
-ui <- fluidPage(title = 'Histogram plotter', theme = "Ternary.css",
+ui <- fluidPage(title = 'Survivorship curves', theme = "Ternary.css",
+  sidebarLayout(
+    sidebarPanel(
+     tags$div("Upload a csv or spreadsheet in which each row or column ",
+              "represents a measurement."),
+     fileInput("datafile", "Data", placeholder = "No data file selected",
+               accept = c('.csv', '.txt', '.xls', '.xlsx')),
+     textOutput(outputId = "dataStatus"),
+     checkboxInput('log', 'Log transform', FALSE),
+     textInput("xlab", "X Label", "Value / unit"),
+    ),
+
+  # Sidebar layout with input and output definitions ----
+
+    mainPanel(
+      tabsetPanel(
+        tabPanel('Plot',
+                 fluidRow(plotOutput(outputId = "plot")),
+                 fluidRow(id = 'saveButtons',
+                   tags$span("Save as: "),
+                   downloadButton('saveR', 'R script'),
+                   downloadButton('savePdf', 'PDF'),
+                   downloadButton('savePng', 'PNG'),
+                   tags$span("PNG size: ", id = 'pngSizeLabel'),
+                   numericInput('pngSize', NULL, 800, 100,
+                               width = "70px", step = 10),
+                   tags$span("pixels"),
+                 ),
+        ),
+        tabPanel("R code",
+                 fluidRow(verbatimTextOutput('code')),
+        )
+      )
+    )
+  )
 
 
-                sidebarLayout(
-                  sidebarPanel(
-                    tags$div("Upload a csv or spreadsheet in which each row or column ",
-                             "represents a measurement."),
-                    fileInput("datafile", "Data", placeholder = "No data file selected",
-                              accept = c('.csv', '.txt', '.xls', '.xlsx')),
-                    textOutput(outputId = "dataStatus"),
-                    textOutput(outputId = "skewness"),
-                    checkboxInput('norm', 'Fit normal', FALSE),
-                    checkboxInput('log', 'Log transform', FALSE),
-                    sliderInput('breaks', "Number of bins", 0, 6, 0, pre = '2^', step = 0.01),
-                    tags$div("Set bins to 2^0 for automatic bin size."),
-                    textInput("xlab", "X Label", "Value / unit"),
-                  ),
-
-                  # Sidebar layout with input and output definitions ----
-
-                  mainPanel(
-                    tabsetPanel(
-                      tabPanel('Plot',
-                               fluidRow(plotOutput(outputId = "plot")),
-                               fluidRow(id = 'saveButtons',
-                                        tags$span("Save as: "),
-                                        downloadButton('saveR', 'R script'),
-                                        downloadButton('savePdf', 'PDF'),
-                                        downloadButton('savePng', 'PNG'),
-                                        tags$span("PNG size: ", id = 'pngSizeLabel'),
-                                        numericInput('pngSize', NULL, 800, 100,
-                                                     width = "70px", step = 10),
-                                        tags$span("pixels"),
-                               ),
-                      ),
-                      tabPanel("R code",
-                               fluidRow(verbatimTextOutput('code')),
-                      )
-                    )
-                  )
-                )
-
-
-                # References and notes
+  # References and notes
 )
 
 server <- function(input, output, session) {
@@ -96,65 +90,51 @@ server <- function(input, output, session) {
     as.numeric(unlist(ret))
   })
 
-  logData <- reactive(if(input$log) log(myData()) else myData())
-  xlab <- reactive(if(input$log) paste0('log(', input$xlab, ')') else input$xlab)
+  xlab <- reactive(input$xlab)
 
   makePlot <- function () {
-    dat <- logData()
+    dat <- myData()
 
-    myHist <- hist(dat,
-                   main = "",
-                   xlab = xlab(),
-                   breaks = if(input$breaks == 0) 'Sturges' else 2 ^ input$breaks
-    )
+    x <- unique(dat)
+    y <- vapply(x, function (x) sum(dat >= x), 0L) * 100 / length(dat)
 
-    if (input$norm) {
-      x <- seq(min(dat), max(dat), length.out = 128)
-      multiplier <- myHist$counts[1] / myHist$density[1]
-      curve(dnorm(x, mean(dat), sd(dat)) * multiplier, add = TRUE)
-    }
+    plot(y ~ x,
+         log = if(input$log) 'xy' else 'y',
+         xlab = xlab(), ylab = "Percentage of individuals surviving",
+         pch = 3, frame = FALSE)
 
   }
 
   rScript <- function() {
     paste0(
-      '# Read the data\n',
       '# Include the full path to your data file here if necessary:\n',
       'myData <- ', switch(fileExt(), '.csv' = 'read.csv',
                            '.txt' = 'read.table',
                            '.xls' = 'readxl::read_excel',
                            'xlsx' = 'readxl::read_excel', 'read.csv'),
-      '("', r$fileName, '")\n',
+      '("', r$fileName, '")\n\n',
 
-      if (input$log) "\n# Log transform the data\nmyData <- log(myData)\n",
-
-      '\n# Plot the histogram\n',
-      'myHist <- hist(myData, main = "",\n',
-      '               breaks = ',
-      if(input$breaks == 0) '"Sturges"' else input$breaks, ',\n',
-      '               xlab = "', xlab(), '")\n\n',
-      if (input$norm) {
-        paste0('# Overlay the best-fitting normal curve\n',
-               'x <- seq(min(myData), max(myData), length.out = 128)\n',
-               'multiplier <- myHist$counts[1] / myHist$density[1]\n',
-               'curve(dnorm(x, mean(myData), sd(myData)) * multiplier, add = TRUE)\n\n')
-      }
+      'x <- c(0, unique(myData))\n',
+      'y <- vapply(x, function (x) sum(myData >= x), 0L) * 100 / length(myData)\n',
+      'plot(y ~ x,\n',
+      '     log = "', if(input$log) 'xy' else 'y', '",\n',
+      '     xlab = "', xlab(), '",\n',
+      '     ylab = "Percentage of individuals surviving",\n',
+      '     pch = 3, frame = FALSE)\n\n'
     )
   }
 
-  output$skewness <- renderText(paste0("Skewness: ",
-                                       signif(moments::skewness(logData()), 4)))
   output$plot <- renderPlot(makePlot())
   output$code <- renderText(rScript())
   output$savePng <- downloadHandler(
-    filename = 'Histogram.png',
+    filename = 'Survivorship.png',
     content = function (file) {
       png(file, width = input$pngSize, height = input$pngSize)
       makePlot()
       dev.off()
     })
   output$savePdf <- downloadHandler(
-    filename = 'Histogram.pdf',
+    filename = 'Survivorship.pdf',
     content = function (file) {
       pdf(file,
           title = paste0('Ternary plot',
@@ -163,7 +143,7 @@ server <- function(input, output, session) {
       dev.off()
     })
   output$saveR <- downloadHandler(
-    filename = 'Histogram.R',
+    filename = 'Survivorship.R',
     content = function (file) {
       writeLines(rScript(), file)
     })

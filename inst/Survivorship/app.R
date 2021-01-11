@@ -15,6 +15,7 @@ ui <- fluidPage(title = 'Histogram plotter', theme = "Ternary.css",
                     checkboxInput('norm', 'Fit normal', FALSE),
                     checkboxInput('log', 'Log transform', FALSE),
                     sliderInput('breaks', "Number of bins", 0, 6, 0, pre = '2^', step = 0.01),
+                    tags$div("Set bins to 2^0 for automatic bin size."),
                     textInput("xlab", "X Label", "Value / unit"),
                   ),
 

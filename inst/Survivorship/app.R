@@ -53,7 +53,7 @@ server <- function(input, output, session) {
 
   filePath <- reactive({
     fileInput <- input$datafile
-    exampleFile <- system.file('terebratulid.txt', package = 'palec')
+    exampleFile <- system.file('linear.txt', package = 'palec')
     if (is.null(fileInput)) {
       output$dataStatus <- renderText(paste(
         "Data file not found; using example from", exampleFile))

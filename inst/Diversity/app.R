@@ -82,7 +82,7 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
 
                              tr(th('Dominance')),
                              tr(
-                               td('Count of most abundant (n_t_): '),
+                               td(HTML(paste0('Count of most abundant (n', tags$sub('t'), '): '))),
                                textOutput('nMax', td),
                                td(id = 'nMaxSwatch', class = 'swatch')
                              ),

@@ -1,4 +1,4 @@
-library("shiny")
+library("shiny", quietly = TRUE)
 library("shinyjs", exclude = 'runExample', warn.conflicts = FALSE,
         quietly = TRUE)
 

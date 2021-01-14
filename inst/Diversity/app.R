@@ -69,16 +69,6 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                textOutput('margalef', td),
                                td(id = 'margalefSwatch', class = 'swatch')
                              ),
-                             tr(
-                               td('Shannon entropy: '),
-                               textOutput('shannon', td),
-                               td(id = 'shannonSwatch', class = 'swatch')
-                             ),
-                             tr(
-                               td('Equitibility (J): '),
-                               textOutput('equit', td),
-                               td(id = 'equitSwatch', class = 'swatch')
-                             ),
 
                              tr(th('Dominance')),
                              tr(
@@ -95,6 +85,16 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                td('Simpson index: '),
                                textOutput('simpson', td),
                                td(id = 'simpsonSwatch', class = 'swatch')
+                             ),
+                             tr(
+                               td('Shannon entropy: '),
+                               textOutput('shannon', td),
+                               td(id = 'shannonSwatch', class = 'swatch')
+                             ),
+                             tr(
+                               td('Equitability (J): '),
+                               textOutput('equit', td),
+                               td(id = 'equitSwatch', class = 'swatch')
                              ),
 
                              tr(td(), td(),
@@ -192,7 +192,7 @@ server <- function(input, output, session) {
            log = if(input$log) 'y' else '',
            xlab = "Rank order",
            ylab = "Count",
-           ylim = if (input$xlim > 0) c(0, input$xlim) else NULL,
+           ylim = if (input$xlim > 0) c(if(input$log) 1 else 0, as.integer(input$xlim)) else NULL,
            frame = FALSE,
            pch = 3
       )

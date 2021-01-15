@@ -120,6 +120,8 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
 
 server <- function(input, output, session) {
   r <- reactiveValues()
+  data('palettes', package = 'palec')
+  myPalette <- palettes[[3]]
 
   filePath <- reactive({
     fileInput <- input$datafile
@@ -225,7 +227,7 @@ server <- function(input, output, session) {
                y <- if(input$log) log10(dat[order]) else dat[order]
                abline(lm(y ~ rev(seq_along(dat))),
                       lty = 'dashed',
-                      col = palec::palettes[[3]][1])
+                      col = myPalette[1])
              }
            },
            'octave' = {
@@ -252,20 +254,20 @@ server <- function(input, output, session) {
                multiplier <- myHist$counts[1] / myHist$density[1]
 
                curve(dnorm(x, mean(octaves), sd(octaves)) * multiplier,
-                     add = TRUE, col = palec::palettes[[3]][2])
+                     add = TRUE, col = myPalette[2])
 
                if (length(nonZero) > 2) {
                  isLogNormal <- shapiro.test(log2(nonZero))
                  text(par('usr')[2] * 1, par('usr')[4] * 0.9,
                       paste0("Shapiro test for normality\n p = ",
                              round(isLogNormal$p.value, 3)), pos = 2,
-                      col = palec::palettes[[3]][2])
+                      col = myPalette[2])
                }
              }
              if (input$geom) {
                 freq <- table(octaves)
                 abline(lm(freq ~ as.integer(names(freq))), lty = 'dashed',
-                       col = palec::palettes[[3]][1])
+                       col = myPalette[1])
              }
 
 

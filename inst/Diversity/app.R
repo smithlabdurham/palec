@@ -17,8 +17,10 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                         setNames(as.list(1:4), paste0('Assemblage_', 1:4))),
             checkboxInput('rank', 'Order by rank abundance', FALSE),
             checkboxInput('log', 'Log transform abundance', FALSE),
-            radioButtons('scatter', 'Plot type',
-                         list('Bar plot' = FALSE, 'Scatter plot' = TRUE)),
+            radioButtons('plotType', 'Plot type',
+                         list('Bar plot' = 'bar', 'Scatter plot' = 'scatter',
+                              "Octave plot" = 'octave')),
+            hidden(checkboxInput('norm', 'Fit normal', FALSE)),
             sliderInput('xlim', 'Axis size (0 = auto)', 0, 420, 0, step = 1),
           ),
 
@@ -185,28 +187,66 @@ server <- function(input, output, session) {
     order <- if (input$rank) order(assemblage()) else seq_along(assemblage())
     lab <- rownames(myData())[order]
 
-    if (input$scatter) {
-      par(las = 1, cex = 0.8, mar = c(4, 4, 0, 1))
-      plot(dat[order] ~ rev(seq_along(dat)),
-           main = "",
-           log = if(input$log) 'y' else '',
-           xlab = "Rank order",
-           ylab = "Count",
-           ylim = if (input$xlim > 0) c(if(input$log) 1 else 0, as.integer(input$xlim)) else NULL,
-           frame = FALSE,
-           pch = 3
-      )
-    } else {
-      par(las = 1, cex = 0.8, mar = c(3, max(nchar(lab)) * 0.6, 0, 1))
-      barplot(dat[order],
-              main = "",
-              log = if(input$log) 'x' else '',
-              horiz = TRUE,
-              names.arg = lab,
-              xlab = "Count",
-              xlim = if (input$xlim > 0) c(0, input$xlim) else NULL
-      )
-    }
+    switch(input$plotType,
+           'bar' = {
+             showElement('rank', TRUE)
+             showElement('log', TRUE)
+             hideElement('norm', TRUE)
+             showElement('xlim', TRUE)
+             par(las = 1, cex = 0.8, mar = c(3, max(nchar(lab)) * 0.6, 0, 1))
+             barplot(dat[order],
+                     main = "",
+                     log = if(input$log) 'x' else '',
+                     horiz = TRUE,
+                     names.arg = lab,
+                     xlab = "Count",
+                     xlim = if (input$xlim > 0) c(0, input$xlim) else NULL
+             )
+           },
+           'scatter' = {
+             showElement('rank', TRUE)
+             showElement('log', TRUE)
+             hideElement('norm', TRUE)
+             showElement('xlim', TRUE)
+             par(las = 1, cex = 0.8, mar = c(4, 4, 0, 1))
+             plot(dat[order] ~ rev(seq_along(dat)),
+                  main = "",
+                  log = if(input$log) 'y' else '',
+                  xlab = "Rank order",
+                  ylab = "Count",
+                  ylim = if (input$xlim > 0) c(if(input$log) 1 else 0, as.integer(input$xlim)) else NULL,
+                  frame = FALSE,
+                  pch = 3
+             )
+           },
+           'octave' = {
+             hideElement('rank', TRUE)
+             hideElement('log', TRUE)
+             showElement('norm', TRUE)
+             hideElement('xlim', TRUE)
+             octaves <- Octaves(dat)
+             maxFreq <- max(table(octaves))
+             breaks <- seq_len(max(octaves) + 1) - 1L
+
+             myHist <- hist(octaves,
+                  breaks = breaks,
+                  main = "",
+                  xlab = 'Octave',
+                  axes = FALSE
+                  )
+             axis(1, at = breaks, labels = 2L ^ (breaks))
+             axis(2, at = if(maxFreq < 8) seq_len(1 + maxFreq) - 1L, NULL)
+             if (input$norm) {
+               x <- seq(0, max(breaks), length.out = 128L)
+               multiplier <- myHist$counts[1] / myHist$density[1]
+
+               curve(dnorm(x, mean(octaves), sd(octaves)) * multiplier,
+                     add = TRUE)
+             }
+
+
+           }
+    )
     for (class in paste0('scale', 0:128)) {
       removeCssClass(class = class, selector = 'td.swatch')
     }

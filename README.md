@@ -3,7 +3,8 @@
 # Tools for Palaeoecological Analysis
 
 This package replicates and enhances some of the functions previously available
-in PAST v2, some of which are now discontinued.
+in [PAST](https://www.nhm.uio.no/english/research/infrastructure/past/) v2,
+some of which are now discontinued.
 
 The tools are intended to provide a straightforward and easy-to-use approach
 to palaeoecosystem analysis, providing context for some widely-used metrics to

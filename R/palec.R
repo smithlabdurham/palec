@@ -63,5 +63,6 @@ Octaves <- function (counts) {
 #' Entry `i` in the list contains `i` discriminable colours in six-digit
 #' hexadecimal RGB format.
 #'
-#' @export
+#' @docType data
+#' @template MRS
 "palettes"

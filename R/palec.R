@@ -30,3 +30,27 @@ Histogram <- function () {
 Diversity <- function () {
   shiny::runApp(system.file('Diversity', package = 'palec'))
 }
+
+#' Assign species to octave
+#'
+#' For details of octave plots, see [course material](https://smithlabdurham.github.io/GEOL2031/2A.html#Octave)
+#'
+#' @param counts Vector containing number of individuals in each species.
+#' Zero entries will be ignored.
+#'
+#' @return Vector listing which octave each non-zero species belongs to,
+#' suitable for the constrution of a histogram (with [`hist()`]) or
+#' tabulation (with [`table()`]).
+#'
+#' @template MRS
+#' @export
+Octaves <- function (counts) {
+  counts <- counts[!is.na(counts)]
+  biggestBinMax <- ceiling(log2(max(counts + 1L)))
+  as.integer(
+    cut(counts[counts > 0],
+        breaks = 2L ^ seq.int(from = 0, to = biggestBinMax,
+                              by = 1L),
+        right = FALSE)
+  )
+}

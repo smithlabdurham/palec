@@ -1,4 +1,4 @@
-library("shiny", quietly = TRUE)
+suppressPackageStartupMessages(library("shiny"))
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(title = 'Histogram plotter', theme = "Ternary.css",

@@ -1,4 +1,4 @@
-library("shiny", quietly = TRUE)
+suppressPackageStartupMessages(library("shiny"))
 library("shinyjs", exclude = 'runExample', warn.conflicts = FALSE,
         quietly = TRUE)
 

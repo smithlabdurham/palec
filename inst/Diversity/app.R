@@ -20,7 +20,8 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
             radioButtons('plotType', 'Plot type',
                          list('Bar plot' = 'bar', 'Scatter plot' = 'scatter',
                               "Octave plot" = 'octave')),
-            hidden(checkboxInput('norm', 'Fit normal', FALSE)),
+            hidden(checkboxInput('norm', 'Fit log-normal', FALSE)),
+            hidden(checkboxInput('geom', 'Fit log-linear (geometric)', FALSE)),
             sliderInput('xlim', 'Axis size (0 = auto)', 0, 420, 0, step = 1),
           ),
 
@@ -192,6 +193,7 @@ server <- function(input, output, session) {
              showElement('rank', TRUE)
              showElement('log', TRUE)
              hideElement('norm', TRUE)
+             hideElement('geom', TRUE)
              showElement('xlim', TRUE)
              par(las = 1, cex = 0.8, mar = c(3, max(nchar(lab)) * 0.6, 0, 1))
              barplot(dat[order],
@@ -207,6 +209,7 @@ server <- function(input, output, session) {
              showElement('rank', TRUE)
              showElement('log', TRUE)
              hideElement('norm', TRUE)
+             hideElement('geom', TRUE)
              showElement('xlim', TRUE)
              par(las = 1, cex = 0.8, mar = c(4, 4, 0, 1))
              plot(dat[order] ~ rev(seq_along(dat)),
@@ -222,6 +225,7 @@ server <- function(input, output, session) {
            'octave' = {
              hideElement('rank', TRUE)
              hideElement('log', TRUE)
+             showElement('geom', TRUE)
              showElement('norm', TRUE)
              hideElement('xlim', TRUE)
              octaves <- Octaves(dat)
@@ -242,6 +246,10 @@ server <- function(input, output, session) {
 
                curve(dnorm(x, mean(octaves), sd(octaves)) * multiplier,
                      add = TRUE)
+             }
+             if (input$geom) {
+                freq <- table(octaves)
+                abline(lm(freq ~ as.integer(names(freq))), lty = 'dashed')
              }
 
 

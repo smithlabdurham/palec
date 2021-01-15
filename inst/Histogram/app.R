@@ -109,7 +109,7 @@ server <- function(input, output, session) {
     )
 
     if (input$norm) {
-      x <- seq(min(dat), max(dat), length.out = 128)
+      x <- seq(min(dat), max(dat), length.out = 128L)
       multiplier <- myHist$counts[1] / myHist$density[1]
       curve(dnorm(x, mean(dat), sd(dat)) * multiplier, add = TRUE)
     }

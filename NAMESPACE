@@ -2,6 +2,7 @@
 
 export(Diversity)
 export(Histogram)
+export(Octaves)
 export(Survivorship)
 importFrom(colourpicker,colourInput)
 importFrom(moments,skewness)

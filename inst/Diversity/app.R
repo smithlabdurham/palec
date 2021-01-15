@@ -235,7 +235,7 @@ server <- function(input, output, session) {
              showElement('norm', TRUE)
              hideElement('xlim', TRUE)
              nonZero <- dat[!is.na(dat)]
-             octaves <- Octaves(nonZero)
+             octaves <- palec::Octaves(nonZero)
              maxFreq <- max(table(octaves))
              breaks <- seq_len(max(octaves) + 1) - 1L
 

@@ -13,7 +13,8 @@ Imports:
   moments,
   shiny,
   shinyjs,
-  Ternary
+  Ternary,
+  viridis
 Suggests:
   covr,
   testthat

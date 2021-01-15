@@ -11,6 +11,11 @@ An object of class \code{list} of length 21.
 palettes
 }
 \description{
-palettes
+A list of colourblind-readable palettes generated using
+\href{https://medialab.github.io/iwanthue/}{iwanthue}.
+}
+\details{
+Entry \code{i} in the list contains \code{i} discriminable colours in six-digit
+hexadecimal RGB format.
 }
 \keyword{datasets}

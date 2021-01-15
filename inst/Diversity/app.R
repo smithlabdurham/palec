@@ -56,7 +56,7 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                                td(id = 'nSwatch', class = 'swatch')
                              ),
 
-                             tr(th('Diversity')),
+                             tr(th('Richness')),
                              tr(
                                td('Species richness (S): '),
                                textOutput('richness', td),
@@ -224,7 +224,8 @@ server <- function(input, output, session) {
              if (input$geom) {
                y <- if(input$log) log10(dat[order]) else dat[order]
                abline(lm(y ~ rev(seq_along(dat))),
-                      lty = 'dotted')
+                      lty = 'dashed',
+                      col = palec::palettes[[3]][1])
              }
            },
            'octave' = {
@@ -233,7 +234,8 @@ server <- function(input, output, session) {
              showElement('geom', TRUE)
              showElement('norm', TRUE)
              hideElement('xlim', TRUE)
-             octaves <- Octaves(dat)
+             nonZero <- dat[!is.na(dat)]
+             octaves <- Octaves(nonZero)
              maxFreq <- max(table(octaves))
              breaks <- seq_len(max(octaves) + 1) - 1L
 
@@ -250,11 +252,20 @@ server <- function(input, output, session) {
                multiplier <- myHist$counts[1] / myHist$density[1]
 
                curve(dnorm(x, mean(octaves), sd(octaves)) * multiplier,
-                     add = TRUE)
+                     add = TRUE, col = palec::palettes[[3]][2])
+
+               if (length(nonZero) > 2) {
+                 isLogNormal <- shapiro.test(log2(nonZero))
+                 text(par('usr')[2] * 1, par('usr')[4] * 0.9,
+                      paste0("Shapiro test for normality\n p = ",
+                             round(isLogNormal$p.value, 3)), pos = 2,
+                      col = palec::palettes[[3]][2])
+               }
              }
              if (input$geom) {
                 freq <- table(octaves)
-                abline(lm(freq ~ as.integer(names(freq))), lty = 'dashed')
+                abline(lm(freq ~ as.integer(names(freq))), lty = 'dashed',
+                       col = palec::palettes[[3]][1])
              }
 
 

@@ -21,7 +21,7 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
                          list('Bar plot' = 'bar', 'Scatter plot' = 'scatter',
                               "Octave plot" = 'octave')),
             hidden(checkboxInput('norm', 'Fit log-normal', FALSE)),
-            hidden(checkboxInput('geom', 'Fit log-linear (geometric)', FALSE)),
+            hidden(checkboxInput('geom', 'Fit (log)linear', FALSE)),
             sliderInput('xlim', 'Axis size (0 = auto)', 0, 420, 0, step = 1),
           ),
 
@@ -209,7 +209,7 @@ server <- function(input, output, session) {
              showElement('rank', TRUE)
              showElement('log', TRUE)
              hideElement('norm', TRUE)
-             hideElement('geom', TRUE)
+             showElement('geom', TRUE)
              showElement('xlim', TRUE)
              par(las = 1, cex = 0.8, mar = c(4, 4, 0, 1))
              plot(dat[order] ~ rev(seq_along(dat)),
@@ -221,6 +221,11 @@ server <- function(input, output, session) {
                   frame = FALSE,
                   pch = 3
              )
+             if (input$geom) {
+               y <- if(input$log) log10(dat[order]) else dat[order]
+               abline(lm(y ~ rev(seq_along(dat))),
+                      lty = 'dotted')
+             }
            },
            'octave' = {
              hideElement('rank', TRUE)

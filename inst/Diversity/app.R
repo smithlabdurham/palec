@@ -161,8 +161,8 @@ server <- function(input, output, session) {
     ret <- switch(fileExt(),
                   '.csv' = read.csv(fp),
                   '.txt' = read.table(fp),
-                  '.xls' = readxl::read_excel(fp),
-                  'xlsx' = readxl::read_excel(fp),
+                  '.xls' = as.data.frame(readxl::read_excel(fp)),
+                  'xlsx' = as.data.frame(readxl::read_excel(fp)),
                   {
                     output$dataStatus <- renderText({
                       paste0("Unsupported file extension: ", fileExt())})
@@ -171,7 +171,11 @@ server <- function(input, output, session) {
     )
 
     if (is.character(ret[, 1])) {
-      rownames(ret) <- ret[, 1]
+      rn <- ret[, 1]
+      rn[is.na(rn)] <- 'BLANK'
+      dups <- duplicated(rn)
+      rn[dups] <- paste0(rn[dups], '_', seq_along(rn[dups]))
+      rownames(ret) <- rn
       ret <- ret[, -1]
     }
 

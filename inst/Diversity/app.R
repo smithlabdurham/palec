@@ -240,8 +240,8 @@ server <- function(input, output, session) {
                   pch = 3
              )
              if (input$geom) {
-               y <- if(input$log) log10(dat[order]) else dat[order]
-               abline(lm(y ~ rev(seq_along(dat))),
+               y <- if(input$log) log10(obs[obsOrder]) else obs[obsOrder]
+               abline(lm(y ~ rev(seq_along(obs))),
                       lty = 'dashed',
                       col = myPalette[1])
              }

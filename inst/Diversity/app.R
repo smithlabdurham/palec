@@ -282,14 +282,19 @@ server <- function(input, output, session) {
                       col = myPalette[2])
                } else {
                  text(par('usr')[2] * 1, par('usr')[4] * 0.9,
-                      "n too small to check for normality", pos = 2,
+                      "n too small to check for fit", pos = 2,
                       col = myPalette[2])
                }
              }
-             if (input$geom) {
+             if (input$geom && length(obs) > 2) {
                 freq <- table(octaves)
-                abline(lm(freq ~ as.integer(names(freq))), lty = 'dashed',
+                reg <- lm(freq ~ I(as.integer(names(freq)) - 0.5))
+                abline(reg, lty = 'dashed',
                        col = myPalette[1])
+                text(par('usr')[2] * 1, par('usr')[4] * 0.7,
+                     paste0("Adjusted R² = ", round(summary(reg)$adj, 3),
+                            "\n(perfect fit if r² = 1)"
+                     ), pos = 2, col = myPalette[1])
              }
 
 

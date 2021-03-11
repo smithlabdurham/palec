@@ -159,7 +159,7 @@ server <- function(input, output, session) {
   myData <- reactive({
     fp <- filePath()
     ret <- switch(fileExt(),
-                  '.csv' = read.csv(fp, row.names = 1),
+                  '.csv' = read.csv(fp),
                   '.txt' = read.table(fp),
                   '.xls' = readxl::read_excel(fp),
                   'xlsx' = readxl::read_excel(fp),
@@ -170,6 +170,10 @@ server <- function(input, output, session) {
                   }
     )
 
+    if (is.character(ret[, 1])) {
+      rownames(ret) <- ret[, 1]
+      ret <- ret[, -1]
+    }
 
     UpdateAssemblages(ret)
     ret
@@ -191,8 +195,10 @@ server <- function(input, output, session) {
   makePlot <- function () {
     dat <- assemblage()
     dat[dat == 0] <- NA
+    obs <- dat[!is.na(dat)]
 
     order <- if (input$rank) order(assemblage()) else seq_along(assemblage())
+    obsOrder <- if (input$rank) order(obs) else seq_along(obs)
     lab <- rownames(myData())[order]
 
     switch(input$plotType,
@@ -219,12 +225,13 @@ server <- function(input, output, session) {
              showElement('geom', TRUE)
              showElement('xlim', TRUE)
              par(las = 1, cex = 0.8, mar = c(4, 4, 0, 1))
-             plot(dat[order] ~ rev(seq_along(dat)),
+             plot(obs[obsOrder] ~ rev(seq_along(obs)),
                   main = "",
                   log = if(input$log) 'y' else '',
                   xlab = "Rank order",
                   ylab = "Count",
-                  ylim = if (input$xlim > 0) c(if(input$log) 1 else 0, as.integer(input$xlim)) else NULL,
+                  ylim = if (input$xlim > 0) c(if(input$log) 1 else 0,
+                                               as.integer(input$xlim)) else NULL,
                   frame = FALSE,
                   pch = 3
              )

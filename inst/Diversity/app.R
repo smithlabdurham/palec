@@ -152,14 +152,14 @@ server <- function(input, output, session) {
 
   UpdateAssemblages <- function (dat) {
     updateRadioButtons(session, 'col',
-                      choices = as.list(dat[1, ] * 0L + seq_along(dat[1, ])))
+                      choices = setNames(seq_along(dat[1, ]), colnames(dat)))
     updateSliderInput(session, 'xlim', max = max(dat))
   }
 
   myData <- reactive({
     fp <- filePath()
     ret <- switch(fileExt(),
-                  '.csv' = read.csv(fp),
+                  '.csv' = read.csv(fp, row.names = 1),
                   '.txt' = read.table(fp),
                   '.xls' = readxl::read_excel(fp),
                   'xlsx' = readxl::read_excel(fp),
@@ -175,6 +175,10 @@ server <- function(input, output, session) {
   })
 
   assemblage <- reactive(myData()[, as.integer(input$col)])
+  counts <- reactive({
+    ass <- assemblage()
+    ass[!is.na(ass)]
+  })
 
   Swatch <- function (id, val, mx = 1, mn = 0) {
     scalePoint <- as.integer(128 * (val - mn) / (mx - mn))
@@ -309,14 +313,14 @@ server <- function(input, output, session) {
   output$plot <- renderPlot(makePlot())
   output$code <- renderText(rScript())
 
-  S <- reactive(sum(assemblage() > 0))
-  n <- reactive(sum(assemblage()))
+  S <- reactive(sum(counts() > 0))
+  n <- reactive(sum(counts()))
   evens <- reactive(n() / S())
-  nMax <- reactive(max(assemblage()))
+  nMax <- reactive(max(counts()))
   menh <- reactive(S() / sqrt(n()))
   marg <- reactive((S() - 1) / log(n()))
   bpi <- reactive(nMax() / n())
-  pi <- reactive(assemblage() / n())
+  pi <- reactive(counts() / n())
   simpson <- reactive(sum(pi() ^ 2))
   log0 <- function (x) ifelse(x == 0, 0, log(x))
   Entropy <- function (p) -sum(p * log0(p))

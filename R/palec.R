@@ -1,7 +1,15 @@
+# Here's a good place to put your top-level package documentation
 #' @importFrom shiny fluidPage
 #' @importFrom shinyjs useShinyjs
-#' @importFrom colourpicker colourInput
+#' @importFrom readxl read_excel
+#' @importFrom viridis inferno
 #' @importFrom moments skewness
+
+.onAttach <- function (lib, pkgname = "palec") {
+    ## Put stuff here you want to run when your package is loaded
+    invisible()
+}
+
 #' Palaeoecological apps
 #'
 #' Applications for palaeontological analysis

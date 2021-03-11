@@ -252,8 +252,7 @@ server <- function(input, output, session) {
              showElement('geom', TRUE)
              showElement('norm', TRUE)
              hideElement('xlim', TRUE)
-             nonZero <- dat[!is.na(dat)]
-             octaves <- palec::Octaves(nonZero)
+             octaves <- palec::Octaves(obs)
              maxFreq <- max(table(octaves))
              breaks <- seq_len(max(octaves) + 1) - 1L
 
@@ -267,16 +266,23 @@ server <- function(input, output, session) {
              axis(2, at = if(maxFreq < 8) seq_len(1 + maxFreq) - 1L, NULL)
              if (input$norm) {
                x <- seq(0, max(breaks), length.out = 128L)
-               multiplier <- myHist$counts[1] / myHist$density[1]
+               fullBin <- which.max(myHist$counts)
+               multiplier <- (myHist$counts / myHist$density)[fullBin]
 
-               curve(dnorm(x, mean(octaves), sd(octaves)) * multiplier,
+               curve(dnorm(x, mean(octaves) - 0.5, sd(octaves)) * multiplier,
                      add = TRUE, col = myPalette[2])
 
-               if (length(nonZero) > 2) {
-                 isLogNormal <- shapiro.test(log2(nonZero))
+               if (length(obs) > 2) {
+                 isLogNormal <- shapiro.test(log2(obs))
                  text(par('usr')[2] * 1, par('usr')[4] * 0.9,
                       paste0("Shapiro test for normality\n p = ",
-                             round(isLogNormal$p.value, 3)), pos = 2,
+                             round(isLogNormal$p.value, 3),
+                             "\n(normal unlikely if p < 0.05)"
+                             ), pos = 2,
+                      col = myPalette[2])
+               } else {
+                 text(par('usr')[2] * 1, par('usr')[4] * 0.9,
+                      "n too small to check for normality", pos = 2,
                       col = myPalette[2])
                }
              }

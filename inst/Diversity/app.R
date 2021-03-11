@@ -153,7 +153,7 @@ server <- function(input, output, session) {
   UpdateAssemblages <- function (dat) {
     updateRadioButtons(session, 'col',
                       choices = setNames(seq_along(dat[1, ]), colnames(dat)))
-    updateSliderInput(session, 'xlim', max = max(dat))
+    updateSliderInput(session, 'xlim', max = max(dat, na.rm = TRUE))
   }
 
   myData <- reactive({
@@ -169,6 +169,7 @@ server <- function(input, output, session) {
                     matrix(0, 0, 3)
                   }
     )
+
 
     UpdateAssemblages(ret)
     ret

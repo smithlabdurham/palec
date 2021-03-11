@@ -203,7 +203,6 @@ server <- function(input, output, session) {
 
     order <- if (input$rank) order(assemblage()) else seq_along(assemblage())
     obsOrder <- if (input$rank) order(obs) else seq_along(obs)
-    lab <- rownames(myData())[order]
 
     switch(input$plotType,
            'bar' = {
@@ -212,8 +211,13 @@ server <- function(input, output, session) {
              hideElement('norm', TRUE)
              hideElement('geom', TRUE)
              showElement('xlim', TRUE)
+             lab <- if (input$rank) {
+               rownames(myData())[!is.na(dat)][obsOrder]
+             } else {
+               rownames(myData())[order]
+             }
              par(las = 1, cex = 0.8, mar = c(3, max(nchar(lab)) * 0.6, 0, 1))
-             barplot(dat[order],
+             barplot(if(input$rank) obs[obsOrder] else dat,
                      main = "",
                      log = if(input$log) 'x' else '',
                      horiz = TRUE,

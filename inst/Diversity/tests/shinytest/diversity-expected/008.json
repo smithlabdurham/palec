@@ -1,0 +1,64 @@
+{
+  "input": {
+    "col": "3",
+    "correct": false,
+    "datafile": null,
+    "geom": true,
+    "log": true,
+    "norm": false,
+    "plotType": "scatter",
+    "pngSize": 800,
+    "rank": true,
+    "xlim": 36
+  },
+  "output": {
+    "bpi": "0.7143",
+    "dataStatus": "Data file not found; using example from C:/Users/pjjg18/AppData/Local/R/win-library/4.3/palec/diversity.txt",
+    "equit": "0.4038",
+    "margalef": "0.8026",
+    "menhinick": "0.6172",
+    "n": "42",
+    "nMax": "30",
+    "plot": {
+      "src": "[image data sha1: 97431b8988915597a658f578aaf7eb6995da6360]",
+      "width": 661,
+      "height": 400,
+      "alt": "Plot object",
+      "coordmap": {
+        "panels": [
+          {
+            "domain": {
+              "left": 0.88,
+              "right": 4.12,
+              "bottom": -0.0622521000306915,
+              "top": 1.61855460079798
+            },
+            "range": {
+              "left": 46.08,
+              "right": 649.48,
+              "bottom": 352.92,
+              "top": -1
+            },
+            "log": {
+              "x": null,
+              "y": 10
+            },
+            "mapping": {
+
+            }
+          }
+        ],
+        "dims": {
+          "width": 661,
+          "height": 400
+        }
+      }
+    },
+    "richness": "4",
+    "shannon": "0.76",
+    "simpson": "0.568"
+  },
+  "export": {
+
+  }
+}

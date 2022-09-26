@@ -4,6 +4,8 @@
 #' @importFrom readxl read_excel
 #' @importFrom viridis inferno
 #' @importFrom moments skewness
+#' @importFrom Ternary TernaryPlot
+#' @importFrom readxl read_excel
 
 .onAttach <- function (lib, pkgname = "palec") {
     ## Put stuff here you want to run when your package is loaded

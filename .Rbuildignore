@@ -1,3 +1,4 @@
+.github
 ^Rd2\.pdf$
 ^Makefile$
 ^assets$
@@ -9,3 +10,6 @@
 ^.*\.log$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^LICENSE$
+^data-raw$
+^man-roxygen$

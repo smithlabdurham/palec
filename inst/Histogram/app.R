@@ -1,7 +1,7 @@
 suppressPackageStartupMessages(library("shiny"))
 
 # Define UI for app that draws a histogram ----
-ui <- fluidPage(title = 'Histogram plotter', theme = "Ternary.css",
+ui <- fluidPage(title = "Histogram plotter", theme = "Ternary.css",
 
 
                 sidebarLayout(
@@ -9,12 +9,12 @@ ui <- fluidPage(title = 'Histogram plotter', theme = "Ternary.css",
                     tags$div("Upload a csv or spreadsheet in which each row or column ",
                              "represents a measurement."),
                     fileInput("datafile", "Data", placeholder = "No data file selected",
-                              accept = c('.csv', '.txt', '.xls', '.xlsx')),
+                              accept = c(".csv", ".txt", ".xls", ".xlsx")),
                     textOutput(outputId = "dataStatus"),
                     textOutput(outputId = "skewness"),
-                    checkboxInput('norm', 'Fit normal', FALSE),
-                    checkboxInput('log', 'Log transform', FALSE),
-                    sliderInput('breaks', "Number of bins", 0, 6, 0, pre = '2^', step = 0.01),
+                    checkboxInput("norm", "Fit normal", FALSE),
+                    checkboxInput("log", "Log transform", FALSE),
+                    sliderInput("breaks", "Number of bins", 0, 6, 0, pre = "2^", step = 0.01),
                     tags$div("Set bins to 2^0 for automatic bin size."),
                     textInput("xlab", "X Label", "Value / unit"),
                   ),
@@ -23,21 +23,21 @@ ui <- fluidPage(title = 'Histogram plotter', theme = "Ternary.css",
 
                   mainPanel(
                     tabsetPanel(
-                      tabPanel('Plot',
+                      tabPanel("Plot",
                                fluidRow(plotOutput(outputId = "plot")),
-                               fluidRow(id = 'saveButtons',
+                               fluidRow(id = "saveButtons",
                                         tags$span("Save as: "),
-                                        downloadButton('saveR', 'R script'),
-                                        downloadButton('savePdf', 'PDF'),
-                                        downloadButton('savePng', 'PNG'),
-                                        tags$span("PNG size: ", id = 'pngSizeLabel'),
-                                        numericInput('pngSize', NULL, 800, 100,
+                                        downloadButton("saveR", "R script"),
+                                        downloadButton("savePdf", "PDF"),
+                                        downloadButton("savePng", "PNG"),
+                                        tags$span("PNG size: ", id = "pngSizeLabel"),
+                                        numericInput("pngSize", NULL, 800, 100,
                                                      width = "70px", step = 10),
                                         tags$span("pixels"),
                                ),
                       ),
                       tabPanel("R code",
-                               fluidRow(verbatimTextOutput('code')),
+                               fluidRow(verbatimTextOutput("code")),
                       )
                     )
                   )
@@ -54,7 +54,7 @@ server <- function(input, output, session) {
 
   filePath <- reactive({
     fileInput <- input$datafile
-    exampleFile <- system.file('linear.txt', package = 'palec')
+    exampleFile <- system.file("linear.txt", package = "palec")
     if (is.null(fileInput)) {
       output$dataStatus <- renderText(paste(
         "Data file not found; using example from", exampleFile))
@@ -82,10 +82,10 @@ server <- function(input, output, session) {
   myData <- reactive({
     fp <- filePath()
     ret <- switch(fileExt(),
-                  '.csv' = read.csv(fp),
-                  '.txt' = read.table(fp),
-                  '.xls' = readxl::read_excel(fp),
-                  'xlsx' = readxl::read_excel(fp),
+                  ".csv" = read.csv(fp),
+                  ".txt" = read.table(fp),
+                  ".xls" = readxl::read_excel(fp),
+                  "xlsx" = readxl::read_excel(fp),
                   {
                     output$dataStatus <- renderText({
                       paste0("Unsupported file extension: ", fileExt())})
@@ -97,7 +97,7 @@ server <- function(input, output, session) {
   })
 
   logData <- reactive(if(input$log) log(myData()) else myData())
-  xlab <- reactive(if(input$log) paste0('log(', input$xlab, ')') else input$xlab)
+  xlab <- reactive(if(input$log) paste0("log(", input$xlab, ")") else input$xlab)
 
   makePlot <- function () {
     dat <- logData()
@@ -105,7 +105,7 @@ server <- function(input, output, session) {
     myHist <- hist(dat,
                    main = "",
                    xlab = xlab(),
-                   breaks = if(input$breaks == 0) 'Sturges' else 2 ^ input$breaks
+                   breaks = if(input$breaks == 0) "Sturges" else 2 ^ input$breaks
     )
 
     if (input$norm) {
@@ -118,26 +118,26 @@ server <- function(input, output, session) {
 
   rScript <- function() {
     paste0(
-      '# Read the data\n',
-      '# Include the full path to your data file here if necessary:\n',
-      'myData <- ', switch(fileExt(), '.csv' = 'read.csv',
-                           '.txt' = 'read.table',
-                           '.xls' = 'readxl::read_excel',
-                           'xlsx' = 'readxl::read_excel', 'read.csv'),
-      '("', r$fileName, '")\n',
+      "# Read the data\n",
+      "# Include the full path to your data file here if necessary:\n",
+      "myData <- ", switch(fileExt(), ".csv" = "read.csv",
+                           ".txt" = "read.table",
+                           ".xls" = "readxl::read_excel",
+                           "xlsx" = "readxl::read_excel", "read.csv"),
+      "(\"", r$fileName, "\")\n",
 
       if (input$log) "\n# Log transform the data\nmyData <- log(myData)\n",
 
-      '\n# Plot the histogram\n',
-      'myHist <- hist(myData, main = "",\n',
-      '               breaks = ',
-      if(input$breaks == 0) '"Sturges"' else input$breaks, ',\n',
-      '               xlab = "', xlab(), '")\n\n',
+      "\n# Plot the histogram\n",
+      "myHist <- hist(myData, main = \"\",\n",
+      "               breaks = ",
+      if(input$breaks == 0) "\"Sturges\"" else input$breaks, ",\n",
+      "               xlab = \"", xlab(), "\")\n\n",
       if (input$norm) {
-        paste0('# Overlay the best-fitting normal curve\n',
-               'x <- seq(min(myData), max(myData), length.out = 128)\n',
-               'multiplier <- myHist$counts[1] / myHist$density[1]\n',
-               'curve(dnorm(x, mean(myData), sd(myData)) * multiplier, add = TRUE)\n\n')
+        paste0("# Overlay the best-fitting normal curve\n",
+               "x <- seq(min(myData), max(myData), length.out = 128)\n",
+               "multiplier <- myHist$counts[1] / myHist$density[1]\n",
+               "curve(dnorm(x, mean(myData), sd(myData)) * multiplier, add = TRUE)\n\n")
       }
     )
   }
@@ -147,23 +147,23 @@ server <- function(input, output, session) {
   output$plot <- renderPlot(makePlot())
   output$code <- renderText(rScript())
   output$savePng <- downloadHandler(
-    filename = 'Histogram.png',
+    filename = "Histogram.png",
     content = function (file) {
       png(file, width = input$pngSize, height = input$pngSize)
       makePlot()
       dev.off()
     })
   output$savePdf <- downloadHandler(
-    filename = 'Histogram.pdf',
+    filename = "Histogram.pdf",
     content = function (file) {
       pdf(file,
-          title = paste0('Ternary plot',
-                         if(filePath() != '') paste0('  from ', filePath())))
+          title = paste0("Ternary plot",
+                         if(filePath() != "") paste0("  from ", filePath())))
       makePlot()
       dev.off()
     })
   output$saveR <- downloadHandler(
-    filename = 'Histogram.R',
+    filename = "Histogram.R",
     content = function (file) {
       writeLines(rScript(), file)
     })

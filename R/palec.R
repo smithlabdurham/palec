@@ -8,8 +8,8 @@
 #' @importFrom readxl read_excel
 
 .onAttach <- function (lib, pkgname = "palec") {
-    ## Put stuff here you want to run when your package is loaded
-    invisible()
+  message("Begin palec analysis by typing Survivorship(), Histogram() or Diversity()")
+  invisible()
 }
 
 #' Palaeoecological apps
@@ -26,19 +26,19 @@
 #' @rdname palec
 #' @export
 Survivorship <- function () {
-  shiny::runApp(system.file('Survivorship', package = 'palec'))
+  shiny::runApp(system.file("Survivorship", package = "palec"))
 }
 
 #' @rdname palec
 #' @export
 Histogram <- function () {
-  shiny::runApp(system.file('Histogram', package = 'palec'))
+  shiny::runApp(system.file("Histogram", package = "palec"))
 }
 
 #' @rdname palec
 #' @export
 Diversity <- function () {
-  shiny::runApp(system.file('Diversity', package = 'palec'))
+  shiny::runApp(system.file("Diversity", package = "palec"))
 }
 
 #' Assign species to octave

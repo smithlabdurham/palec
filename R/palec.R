@@ -7,7 +7,7 @@
 #' @importFrom readxl read_excel
 
 .onAttach <- function (lib, pkgname = "palec") {
-  message("Begin palec analysis by typing Survivorship(), Histogram() or Diversity()")
+  packageStartupMessage("Begin palec analysis by typing Survivorship(), Histogram() or Diversity()")
   invisible()
 }
 

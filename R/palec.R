@@ -2,7 +2,6 @@
 #' @importFrom shiny fluidPage
 #' @importFrom shinyjs useShinyjs
 #' @importFrom readxl read_excel
-#' @importFrom viridis inferno
 #' @importFrom moments skewness
 #' @importFrom Ternary TernaryPlot
 #' @importFrom readxl read_excel

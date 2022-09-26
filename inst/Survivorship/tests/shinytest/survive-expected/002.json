@@ -1,0 +1,50 @@
+{
+  "input": {
+    "datafile": null,
+    "logX": true,
+    "logY": false,
+    "pngSize": 800,
+    "xlab": "Test axis"
+  },
+  "output": {
+    "dataStatus": "Data file not found; using example from C:/Users/pjjg18/AppData/Local/R/win-library/4.3/palec/linear.txt",
+    "plot": {
+      "src": "[image data sha1: 2eecc323ffc2120209c58b57f4007f153dc321bd]",
+      "width": 661,
+      "height": 400,
+      "alt": "Plot object",
+      "coordmap": {
+        "panels": [
+          {
+            "domain": {
+              "left": -0.0311260500153457,
+              "right": 0.809277300398989,
+              "bottom": -2.32258064516129,
+              "top": 103.935483870968
+            },
+            "range": {
+              "left": 59.04,
+              "right": 630.76,
+              "bottom": 325.56,
+              "top": 58.04
+            },
+            "log": {
+              "x": 10,
+              "y": null
+            },
+            "mapping": {
+
+            }
+          }
+        ],
+        "dims": {
+          "width": 661,
+          "height": 400
+        }
+      }
+    }
+  },
+  "export": {
+
+  }
+}

@@ -1,16 +1,16 @@
 suppressPackageStartupMessages(library("shiny"))
 
 # Define UI for app that draws a histogram ----
-ui <- fluidPage(title = 'Survivorship curves', theme = "Ternary.css",
+ui <- fluidPage(title = "Survivorship curves", theme = "Ternary.css",
   sidebarLayout(
     sidebarPanel(
      tags$div("Upload a csv or spreadsheet in which each row or column ",
               "represents a measurement."),
      fileInput("datafile", "Data", placeholder = "No data file selected",
-               accept = c('.csv', '.txt', '.xls', '.xlsx')),
+               accept = c(".csv", ".txt", ".xls", ".xlsx")),
      textOutput(outputId = "dataStatus"),
-     checkboxInput('logX', 'Log transform X', FALSE),
-     checkboxInput('logY', 'Log transform Y', TRUE),
+     checkboxInput("logX", "Log transform X", FALSE),
+     checkboxInput("logY", "Log transform Y", TRUE),
      textInput("xlab", "X Label", "Value / unit"),
     ),
 
@@ -18,21 +18,21 @@ ui <- fluidPage(title = 'Survivorship curves', theme = "Ternary.css",
 
     mainPanel(
       tabsetPanel(
-        tabPanel('Plot',
+        tabPanel("Plot",
                  fluidRow(plotOutput(outputId = "plot")),
-                 fluidRow(id = 'saveButtons',
+                 fluidRow(id = "saveButtons",
                    tags$span("Save as: "),
-                   downloadButton('saveR', 'R script'),
-                   downloadButton('savePdf', 'PDF'),
-                   downloadButton('savePng', 'PNG'),
-                   tags$span("PNG size: ", id = 'pngSizeLabel'),
-                   numericInput('pngSize', NULL, 800, 100,
+                   downloadButton("saveR", "R script"),
+                   downloadButton("savePdf", "PDF"),
+                   downloadButton("savePng", "PNG"),
+                   tags$span("PNG size: ", id = "pngSizeLabel"),
+                   numericInput("pngSize", NULL, 800, 100,
                                width = "70px", step = 10),
                    tags$span("pixels"),
                  ),
         ),
         tabPanel("R code",
-                 fluidRow(verbatimTextOutput('code')),
+                 fluidRow(verbatimTextOutput("code")),
         )
       )
     )
@@ -49,7 +49,7 @@ server <- function(input, output, session) {
 
   filePath <- reactive({
     fileInput <- input$datafile
-    exampleFile <- system.file('linear.txt', package = 'palec')
+    exampleFile <- system.file("linear.txt", package = "palec")
     if (is.null(fileInput)) {
       output$dataStatus <- renderText(paste(
         "Data file not found; using example from", exampleFile))
@@ -77,10 +77,10 @@ server <- function(input, output, session) {
   myData <- reactive({
     fp <- filePath()
     ret <- switch(fileExt(),
-                  '.csv' = read.csv(fp),
-                  '.txt' = read.table(fp),
-                  '.xls' = readxl::read_excel(fp),
-                  'xlsx' = readxl::read_excel(fp),
+                  ".csv" = read.csv(fp),
+                  ".txt" = read.table(fp),
+                  ".xls" = readxl::read_excel(fp),
+                  "xlsx" = readxl::read_excel(fp),
                   {
                     output$dataStatus <- renderText({
                       paste0("Unsupported file extension: ", fileExt())})
@@ -100,7 +100,7 @@ server <- function(input, output, session) {
     y <- vapply(x, function (x) sum(dat >= x), 0L) * 100 / length(dat)
 
     plot(y ~ x,
-         log = paste0(if(input$logX) 'x' else '', if(input$logY) 'y'),
+         log = paste0(if(input$logX) "x" else "", if(input$logY) "y"),
          xlab = xlab(), ylab = "Percentage of individuals surviving",
          pch = 3, frame = FALSE)
 
@@ -108,43 +108,43 @@ server <- function(input, output, session) {
 
   rScript <- function() {
     paste0(
-      '# Include the full path to your data file here if necessary:\n',
-      'myData <- ', switch(fileExt(), '.csv' = 'read.csv',
-                           '.txt' = 'read.table',
-                           '.xls' = 'readxl::read_excel',
-                           'xlsx' = 'readxl::read_excel', 'read.csv'),
-      '("', r$fileName, '")\n\n',
+      "# Include the full path to your data file here if necessary:\n",
+      "myData <- ", switch(fileExt(), ".csv" = "read.csv",
+                           ".txt" = "read.table",
+                           ".xls" = "readxl::read_excel",
+                           "xlsx" = "readxl::read_excel", "read.csv"),
+      "(\"", r$fileName, "\")\n\n",
 
-      'x <- c(0, unique(myData))\n',
-      'y <- vapply(x, function (x) sum(myData >= x), 0L) * 100 / length(myData)\n',
-      'plot(y ~ x,\n',
-      '     log = "', if(input$logX) 'x', if(input$logY) 'y' else '', '",\n',
-      '     xlab = "', xlab(), '",\n',
-      '     ylab = "Percentage of individuals surviving",\n',
-      '     pch = 3, frame = FALSE)\n\n'
+      "x <- c(0, unique(myData))\n",
+      "y <- vapply(x, function (x) sum(myData >= x), 0L) * 100 / length(myData)\n",
+      "plot(y ~ x,\n",
+      "     log = \"", if(input$logX) "x", if(input$logY) "y" else "", "\",\n",
+      "     xlab = \"", xlab(), "\",\n",
+      "     ylab = \"Percentage of individuals surviving\",\n",
+      "     pch = 3, frame = FALSE)\n\n"
     )
   }
 
   output$plot <- renderPlot(makePlot())
   output$code <- renderText(rScript())
   output$savePng <- downloadHandler(
-    filename = 'Survivorship.png',
+    filename = "Survivorship.png",
     content = function (file) {
       png(file, width = input$pngSize, height = input$pngSize)
       makePlot()
       dev.off()
     })
   output$savePdf <- downloadHandler(
-    filename = 'Survivorship.pdf',
+    filename = "Survivorship.pdf",
     content = function (file) {
       pdf(file,
-          title = paste0('Ternary plot',
-                         if(filePath() != '') paste0('  from ', filePath())))
+          title = paste0("Ternary plot",
+                         if(filePath() != "") paste0("  from ", filePath())))
       makePlot()
       dev.off()
     })
   output$saveR <- downloadHandler(
-    filename = 'Survivorship.R',
+    filename = "Survivorship.R",
     content = function (file) {
       writeLines(rScript(), file)
     })

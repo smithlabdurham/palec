@@ -120,8 +120,7 @@ ui <- fluidPage(title = 'Diversity analysis', theme = "Ternary.css",
 
 server <- function(input, output, session) {
   r <- reactiveValues()
-  data('palettes', package = 'palec')
-  myPalette <- palettes[[3]]
+  myPalette <- palette.colors(4)[-1]
 
   filePath <- reactive({
     fileInput <- input$datafile

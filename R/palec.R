@@ -64,15 +64,3 @@ Octaves <- function (counts) {
         right = FALSE)
   )
 }
-
-#' palettes
-#'
-#' A list of colourblind-readable palettes generated using
-#' [iwanthue](https://medialab.github.io/iwanthue/).
-#'
-#' Entry `i` in the list contains `i` discriminable colours in six-digit
-#' hexadecimal RGB format.
-#'
-#' @docType data
-#' @template MRS
-"palettes"

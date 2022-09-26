@@ -3,7 +3,11 @@ Title: Teaching Materials for Palaeoecosystem Analysis
 Description: Teaching materials for the analysis of palaeoecosystems, developed
   to accompany teaching by Martin R. Smith.
 Version: 0.0.0.9000
-Authors@R: person(c("Martin", "R."), "Smith", role=c("aut", "cre"), email="martin.smith@durham.ac.uk")
+Authors@R: person(
+    c("Martin", "R."), "Smith",
+    role = c("aut", "cre"),
+    email = "martin.smith@durham.ac.uk"
+  )
 URL: https://github.com/ms609/palec/
 BugReports: https://github.com/ms609/palec/issues/
 License: GPL-3
@@ -15,10 +19,9 @@ Imports:
   shiny,
   shinyjs,
   Ternary,
-  viridis
 Suggests:
   covr,
-  testthat
+  testthat,
 Encoding: UTF-8
 RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)

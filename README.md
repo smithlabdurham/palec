@@ -11,7 +11,7 @@ to palaeoecosystem analysis, providing context for some widely-used metrics to
 allow rigorous interpretation.
 
 An introduction to its use, with full installation instructions,
-is available as part of my [GEOL2031 teaching materials](https://smithlabdurham.github.io/GEOL2031/2S.html).
+is available as part of my [GEOL2347 teaching materials](https://smithlabdurham.github.io/GEOL2347/2S.html).
 
 ## Installing
 

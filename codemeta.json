@@ -13,11 +13,13 @@
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.2.1 (2022-06-23)",
   "author": [
     {
       "@type": "Person",
-      "givenName": ["Martin", "R."],
+      "givenName": [
+        "Martin",
+        "R."
+      ],
       "familyName": "Smith",
       "email": "martin.smith@durham.ac.uk"
     }
@@ -25,7 +27,10 @@
   "maintainer": [
     {
       "@type": "Person",
-      "givenName": ["Martin", "R."],
+      "givenName": [
+        "Martin",
+        "R."
+      ],
       "familyName": "Smith",
       "email": "martin.smith@durham.ac.uk"
     }
@@ -56,14 +61,14 @@
       "sameAs": "https://CRAN.R-project.org/package=testthat"
     }
   ],
-  "softwareRequirements": {
-    "1": {
+  "softwareRequirements": [
+    {
       "@type": "SoftwareApplication",
       "identifier": "R",
       "name": "R",
       "version": ">= 3.4.0"
     },
-    "2": {
+    {
       "@type": "SoftwareApplication",
       "identifier": "moments",
       "name": "moments",
@@ -75,7 +80,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=moments"
     },
-    "3": {
+    {
       "@type": "SoftwareApplication",
       "identifier": "readxl",
       "name": "readxl",
@@ -87,7 +92,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=readxl"
     },
-    "4": {
+    {
       "@type": "SoftwareApplication",
       "identifier": "shiny",
       "name": "shiny",
@@ -99,7 +104,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=shiny"
     },
-    "5": {
+    {
       "@type": "SoftwareApplication",
       "identifier": "shinyjs",
       "name": "shinyjs",
@@ -111,7 +116,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=shinyjs"
     },
-    "6": {
+    {
       "@type": "SoftwareApplication",
       "identifier": "Ternary",
       "name": "Ternary",
@@ -122,8 +127,6 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=Ternary"
-    },
-    "SystemRequirements": null
-  },
-  "fileSize": "885.815KB"
+    }
+  ]
 }

@@ -13,3 +13,4 @@
 ^LICENSE$
 ^data-raw$
 ^man-roxygen$
+^codemeta\.json$
